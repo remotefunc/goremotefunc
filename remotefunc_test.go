@@ -11,7 +11,7 @@ func TestCallfunc(t *testing.T) {
 		return s
 	}
 	result := rf.callfunc(params, fun)
-	if (result.(string)) != "test" {
-		t.Errorf("T1: %s != T2: %s", result.(string), "test")
+	if result != "\"test\"" {
+		t.Errorf("T1: %s != T2: %s", result, "\"test\"")
 	}
 }
