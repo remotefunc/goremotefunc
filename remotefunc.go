@@ -32,7 +32,7 @@ func (rf *RemoteFunc) AddFunc(name string, fun interface{}) {
 		params := string(b)
 
 		result := rf.callfunc(params, fun)
-		w.Write(result)
+		w.Write([]byte(result))
 	})
 }
 
@@ -63,7 +63,7 @@ func (rf *RemoteFunc) callfunc(jsonparams string, fun interface{}) string {
 	//Return result
 	if len(resultvalues) == 1 {
 		return tojson(resultvalues[0].Interface())
-	} else if len(resultvalues) > 0 {
+	} else if len(resultvalues) > 1 {
 		//More than one result, return array
 		resultinterfaces := make([]interface{}, len(resultvalues))
 		for i := 0; i < len(resultvalues); i++ {
