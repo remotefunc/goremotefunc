@@ -2,28 +2,34 @@ package remotefunc
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"reflect"
 )
 
 type RemoteFunc struct {
-	serve *http.ServeMux
+	*http.ServeMux
+	Port string
 }
 
 func New() RemoteFunc {
 	mux := http.NewServeMux()
 	return RemoteFunc{
-		serve: mux,
+		mux,
+		":3000",
 	}
 }
 
-func (rf *RemoteFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	rf.serve.ServeHTTP(w, r)
+func (rf *RemoteFunc) Start() {
+	log.Println("Starting RemoteFunc on port", rf.Port)
+	log.Fatal(http.ListenAndServe(rf.Port, rf))
 }
 
 func (rf *RemoteFunc) AddFunc(name string, fun interface{}) {
-	rf.serve.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
+	endpoint := fmt.Sprintf("/%s", name)
+	rf.HandleFunc(endpoint, func(w http.ResponseWriter, r *http.Request) {
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return
@@ -49,7 +55,10 @@ func (rf *RemoteFunc) callfunc(jsonparams string, fun interface{}) string {
 	for i := 0; i < funplen; i++ {
 		inputinterfaces[i] = reflect.New(funt.In(i)).Interface()
 	}
-	fromjson(jsonparams, &inputinterfaces)
+
+	if len(inputinterfaces) > 0 {
+		fromjson(jsonparams, &inputinterfaces)
+	}
 
 	//Make input from into values
 	inputvalues := make([]reflect.Value, funplen)
